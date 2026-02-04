@@ -119,8 +119,12 @@ class KaitlynAgent:
     )
 
     def __init__(self):
-        self.model = ChatGoogleGenerativeAI(model="gemini-2.0-flash")
-        # self.model = ChatOllama(model="llama3.2", temperature=0)
+        # self.model = ChatGoogleGenerativeAI(model="gemini-2.0-flash")
+        self.model = ChatOllama(
+            model="qwen3:4b",
+            temperature=0,
+            streaming=False,      # IMPORTANT: prevents event queue closure
+        )
         self.tools = [get_availability]
 
         self.graph = create_react_agent(
@@ -128,64 +132,30 @@ class KaitlynAgent:
             tools=self.tools,
             checkpointer=memory,
             prompt=self.SYSTEM_INSTRUCTION,
-            response_format=ResponseFormat,
+            debug=False,
         )
 
     def invoke(self, query, context_id):
         config: RunnableConfig = {"configurable": {"thread_id": context_id}}
         today_str = f"Today's date is {date.today().strftime('%Y-%m-%d')}."
         augmented_query = f"{today_str}\n\nUser query: {query}"
-        self.graph.invoke({"messages": [("user", augmented_query)]}, config)
+        result = self.graph.invoke(
+            {"messages": [("user", augmented_query)]},
+            config,
+        )
         return self.get_agent_response(config)
 
-    async def stream(self, query, context_id) -> AsyncIterable[dict[str, Any]]:
-        today_str = f"Today's date is {date.today().strftime('%Y-%m-%d')}."
-        augmented_query = f"{today_str}\n\nUser query: {query}"
-        inputs = {"messages": [("user", augmented_query)]}
-        config: RunnableConfig = {"configurable": {"thread_id": context_id}}
-
-        for item in self.graph.stream(inputs, config, stream_mode="values"):
-            message = item["messages"][-1]
-            if (
-                isinstance(message, AIMessage)
-                and message.tool_calls
-                and len(message.tool_calls) > 0
-            ):
-                yield {
-                    "is_task_complete": False,
-                    "require_user_input": False,
-                    "content": "Checking Kaitlyn's availability...",
-                }
-            elif isinstance(message, ToolMessage):
-                yield {
-                    "is_task_complete": False,
-                    "require_user_input": False,
-                    "content": "Processing availability...",
-                }
-
-        yield self.get_agent_response(config)
 
     def get_agent_response(self, config):
         current_state = self.graph.get_state(config)
-        structured_response = current_state.values.get("structured_response")
-        if structured_response and isinstance(structured_response, ResponseFormat):
-            if structured_response.status == "input_required":
-                return {
-                    "is_task_complete": False,
-                    "require_user_input": True,
-                    "content": structured_response.message,
-                }
-            if structured_response.status == "error":
-                return {
-                    "is_task_complete": False,
-                    "require_user_input": True,
-                    "content": structured_response.message,
-                }
-            if structured_response.status == "completed":
+        messages = current_state.values.get("messages", [])
+        if messages:
+            last_msg = messages[-1]
+            if isinstance(last_msg, AIMessage):
                 return {
                     "is_task_complete": True,
                     "require_user_input": False,
-                    "content": structured_response.message,
+                    "content": last_msg.content,
                 }
 
         return {
@@ -196,3 +166,14 @@ class KaitlynAgent:
                 "Please try again."
             ),
         }
+
+    async def stream(self, query, context_id):
+        """
+        Compatibility shim for a2a.
+
+        a2a expects agents to expose `stream()`, but we intentionally
+        do NOT stream LangGraph events. This method executes the agent
+        synchronously via invoke() and yields exactly one final result.
+        """
+        result = self.invoke(query, context_id)
+        yield result

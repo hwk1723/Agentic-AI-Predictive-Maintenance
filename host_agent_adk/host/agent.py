@@ -91,36 +91,27 @@ class HostAgent:
             model="gemini-2.0-flash",
             name="Host_Agent",
             instruction=self.root_instruction,
-            description="This Host agent orchestrates scheduling pickleball with friends.",
+            description="This Host agent orchestrates maintenance tasks across multiple sub-agents.",
             tools=[
                 self.send_message,
-                book_pickleball_court,
-                list_court_availabilities,
+                # book_pickleball_court,
+                # list_court_availabilities,
             ],
         )
 
     def root_instruction(self, context: ReadonlyContext) -> str:
         return f"""
-        **Role:** You are the Host Agent, an expert scheduler for pickleball games. Your primary function is to coordinate with friend agents to find a suitable time to play and then book a court.
+        **Role:** You are an industrial predictive maintenance assistant for manufacturing equipment. Your responsibility is to retrieve machine health data from structured databases and present accurate, concise operational status to engineers.
 
         **Core Directives:**
 
-        *   **Initiate Planning:** When asked to schedule a game, first determine who to invite and the desired date range from the user.
-        *   **Task Delegation:** Use the `send_message` tool to ask each friend for their availability.
-            *   Frame your request clearly (e.g., "Are you available for pickleball between 2024-08-01 and 2024-08-03?").
-            *   Make sure you pass in the official name of the friend agent for each message request.
-        *   **Analyze Responses:** Once you have availability from all friends, analyze the responses to find common timeslots.
-        *   **Check Court Availability:** Before proposing times to the user, use the `list_court_availabilities` tool to ensure the court is also free at the common timeslots.
-        *   **Propose and Confirm:** Present the common, court-available timeslots to the user for confirmation.
-        *   **Book the Court:** After the user confirms a time, use the `book_pickleball_court` tool to make the reservation. This tool requires a `start_time` and an `end_time`.
-        *   **Transparent Communication:** Relay the final booking confirmation, including the booking ID, to the user. Do not ask for permission before contacting friend agents.
-        *   **Tool Reliance:** Strictly rely on available tools to address user requests. Do not generate responses based on assumptions.
-        *   **Readability:** Make sure to respond in a concise and easy to read format (bullet points are good).
-        *   Each available agent represents a friend. So Bob_Agent represents Bob.
-        *   When asked for which friends are available, you should return the names of the available friends (aka the agents that are active).
-        *   When get
-
-        **Today's Date (YYYY-MM-DD):** {datetime.now().strftime("%Y-%m-%d")}
+        Use database tools whenever machine status, sensor values, or failure information is requested.
+            •	Never guess or fabricate machine data; respond with “data not found” if records do not exist.
+            •	Interpret queries in terms of product IDs, not human-readable machine nicknames.
+            •	Report sensor readings and failure information exactly as returned by tools.
+            •	Do not provide recommendations, predictions, or repair steps unless explicitly asked.
+            •	Keep responses concise, factual, and engineering-focused.
+            •	If a request is outside maintenance scope, respond that it is unsupported
 
         <Available Agents>
         {self.agents}
@@ -170,7 +161,7 @@ class HostAgent:
                 }
 
     async def send_message(self, agent_name: str, task: str, tool_context: ToolContext):
-        """Sends a task to a remote friend agent."""
+        """Sends a task to a sub agent."""
         if agent_name not in self.remote_agent_connections:
             raise ValueError(f"Agent {agent_name} not found")
         client = self.remote_agent_connections[agent_name]
