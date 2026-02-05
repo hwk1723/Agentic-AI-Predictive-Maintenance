@@ -74,42 +74,47 @@ def maintenance_docs_RAG(query: str) -> str:
 
     embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
 
-    pdf_path = "/Users/howaikit/Documents/GitHub/Agentic-AI-Predictive-Maintenance/rag_agent_langgraph/app/Document.pdf"
+    # pdf_path = "/Users/howaikit/Documents/GitHub/Agentic-AI-Predictive-Maintenance/rag_agent_langgraph/app/Document.pdf"
 
-    if not os.path.exists(pdf_path):
-        raise FileNotFoundError(f"PDF file not found at {pdf_path}")
+    # if not os.path.exists(pdf_path):
+    #     raise FileNotFoundError(f"PDF file not found at {pdf_path}")
 
-    pdf_loader = PyPDFLoader(pdf_path)
+    # pdf_loader = PyPDFLoader(pdf_path)
 
-    try:
-        pages = pdf_loader.load()
-        print(f"Loaded {len(pages)} pages from the PDF file.")
-    except Exception as e:
-        print(f"Error loading PDF file: {e}")
-        raise
+    # try:
+    #     pages = pdf_loader.load()
+    #     print(f"Loaded {len(pages)} pages from the PDF file.")
+    # except Exception as e:
+    #     print(f"Error loading PDF file: {e}")
+    #     raise
 
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=1000, 
-        chunk_overlap=200)
+    # text_splitter = RecursiveCharacterTextSplitter(
+    #     chunk_size=1000, 
+    #     chunk_overlap=200)
 
-    pages_split = text_splitter.split_documents(pages)
+    # pages_split = text_splitter.split_documents(pages)
 
-    persist_directory = r"/Users/howaikit/Documents/GitHub/Agentic-AI-Predictive-Maintenance/rag_agent_langgraph"
-    collection_name = "maintenance_and_sop_collection"
+    persist_directory = r"/Users/howaikit/Documents/GitHub/Agentic-AI-Predictive-Maintenance/rag_agent_langgraph/app/vectorstore"
+    # collection_name = "maintenance_and_sop_collection"
 
     if not os.path.exists(persist_directory):
         os.makedirs(persist_directory)
 
     try:
-        vector_store = Chroma.from_documents(
-            documents=pages_split,
-            embedding=embeddings,
+        vector_store = Chroma(
+            embedding_function=embeddings,
             persist_directory=persist_directory,
-            collection_name=collection_name
+            collection_name="maintenance_and_sop_collection"
+        # vector_store = Chroma.from_documents(
+        #     documents=pages_split,
+        #     embedding=embeddings,
+        #     persist_directory=persist_directory,
+        #     collection_name=collection_name
         )
-        print(f"Vector store created with {len(pages)} documents.")
+        # print(f"Vector store created with {len(pages)} documents.")
+        print(f"Vector store loaded.")
     except Exception as e:
-        print(f"Error creating vector store: {e}")
+        print(f"Error loading vector store: {e}")
         raise
 
     retriever = vector_store.as_retriever(

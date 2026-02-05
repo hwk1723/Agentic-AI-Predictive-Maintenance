@@ -44,21 +44,28 @@ def main():
 
         capabilities = AgentCapabilities(streaming=True)
         skill = AgentSkill(
-            id="check_schedule",
+            id="query_machine_status",
             name="Check Machine Parameters",
             description="Get machine parameters by product ID",
             tags=["maintenance", "parameters"],
-            examples=["What are the parameters for Lathe-03?"],
+            examples=["What are the parameters(status) for Lathe-03?"],
+        )
+        skill2 = AgentSkill(
+            id="predict_failure_type",
+            name="Predict Machine Failure Type",
+            description="Predict the failure type of a machine based on its operational parameters",
+            tags=["maintenance", "condition", "prediction"],
+            examples=["What is the predicted failure type of Lathe-03?"],
         )
         agent_card = AgentCard(
             name="Maintenance Agent",
-            description="An agent that manages machine parameters for predictive maintenance.",
+            description="An agent that queries machine parameters for predictive maintenance.",
             url=f"http://{host}:{port}/",
             version="1.0.0",
             defaultInputModes=["text/plain"],
             defaultOutputModes=["text/plain"],
             capabilities=capabilities,
-            skills=[skill],
+            skills=[skill, skill2],
         )
 
         adk_agent = create_agent()
