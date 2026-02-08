@@ -6,18 +6,17 @@ from typing import Any, List, Literal
 from langchain_core.messages import AIMessage, ToolMessage
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
-from langchain_google_genai import ChatGoogleGenerativeAI
+# from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_ollama import ChatOllama
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.prebuilt import create_react_agent
 from pydantic import BaseModel, Field
 
-
 import os
 from langchain_openai import OpenAIEmbeddings
-from langchain_community.document_loaders import PyPDFLoader
+# from langchain_community.document_loaders import PyPDFLoader
 from langchain_chroma import Chroma
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+# from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 memory = MemorySaver()
 

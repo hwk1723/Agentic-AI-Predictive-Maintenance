@@ -11,7 +11,7 @@ from a2a.types import (
     UnsupportedOperationError,
 )
 from a2a.utils.errors import ServerError
-from app.agent import RagAgent
+from agent import RagAgent
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

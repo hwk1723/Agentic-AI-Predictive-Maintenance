@@ -12,8 +12,8 @@ from a2a.types import (
     AgentCard,
     AgentSkill,
 )
-from app.agent import RagAgent
-from app.agent_executor import RagAgentExecutor
+from agent import RagAgent
+from agent_executor import RagAgentExecutor
 from dotenv import load_dotenv
 
 load_dotenv()

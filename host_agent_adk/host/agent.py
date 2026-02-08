@@ -112,12 +112,19 @@ class HostAgent:
             •	Report sensor readings and failure information exactly as returned by tools.
             •	Do not provide recommendations, predictions, or repair steps unless explicitly asked.
             •	Keep responses concise, factual, and engineering-focused.
-            •	If a request is outside maintenance scope, respond that it is unsupported
+            •   Once you have retrieved the data, summarize in bullet points for clarity to the user.
 
         RAG (Retrieval-Augmented Generation):
             •	Utilize RAG tools to access machine manuals and SOPs when specific procedural or operational information is requested.
             •	Extract and summarize relevant sections from manuals/SOPs without adding personal interpretation.
             •	Ensure all information provided is directly supported by the retrieved documents.
+            •   Do not attempt to answer procedural questions without retrieval from the documentation. If no relevant information is found, respond accordingly (Eg: The information is currently unavailable).
+
+        Predictive Maintenance:
+            •	Delegate predictive maintenance tasks to the Prediction Agent when failure type predictions are requested.
+            •	Do not attempt to predict machine conditions or failure types yourself.
+            •	Only provide predictive maintenance information as returned by the Prediction Agent.
+            •   Before requesting for the required inputs, check if the information is already available from the conversation history. (Eg: If the user asks `What is the predicted failure type for machine X?` and the required input was earlier in the conversation, confirm with the user if those inputs should be used directly instead of asking the user again.)
 
         <Available Agents>
         {self.agents}
@@ -220,9 +227,9 @@ def _get_initialized_host_agent_sync():
     async def _async_main():
         # Hardcoded URLs for the friend agents
         friend_agent_urls = [
-            "http://localhost:10002",  # Karley's Agent
-            "http://localhost:10003",  # Nate's Agent
-            "http://localhost:10004",  # Kaitlynn's Agent
+            "http://localhost:10002",  # Database Agent
+            "http://localhost:10003",  # Prediction Agent
+            "http://localhost:10004",  # RAG Agent
         ]
 
         print("initializing host agent")
