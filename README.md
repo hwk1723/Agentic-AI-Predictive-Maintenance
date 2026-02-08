@@ -26,25 +26,25 @@ GOOGLE_API_KEY="your_api_key_here"
 
 You will need to run each agent in a separate terminal window. The first time you run these commands, `uv` will create a virtual environment and install all necessary dependencies before starting the agent.
 
-### Terminal 1: Run Kaitlynn Agent
+### Terminal 1: Run RAG Agent
 ```bash
-cd kaitlynn_agent_langgraph
+cd rag_agent_langgraph
 uv venv
 source .venv/bin/activate
 uv run --active app/__main__.py
 ```
 
-### Terminal 2: Run Nate Agent
+### Terminal 2: Run Database Agent
 ```bash
-cd nate_agent_crewai
+cd database_agent
 uv venv
 source .venv/bin/activate
 uv run --active .
 ```
 
-### Terminal 3: Run Karley Agent
+### Terminal 3: Predictive Maintenance Agent
 ```bash
-cd karley_agent_adk
+cd Predictive-Maintenance-Agent
 uv venv
 source .venv/bin/activate
 uv run --active .
