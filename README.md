@@ -1,4 +1,4 @@
-# A2A Friend Scheduling Demo
+# A2A Predictive Maintenance Demo
 This document describes a multi-agent application demonstrating how to orchestrate conversations between different agents to schedule a meeting.
 
 This application contains four agents:
