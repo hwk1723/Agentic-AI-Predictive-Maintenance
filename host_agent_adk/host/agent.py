@@ -24,9 +24,8 @@ from google.adk.sessions import InMemorySessionService
 from google.adk.tools.tool_context import ToolContext
 from google.genai import types
 
-from .pickleball_tools import (
-    book_pickleball_court,
-    list_court_availabilities,
+from .tools import (
+    generate_explanation_tool,
 )
 from .remote_agent_connection import RemoteAgentConnections
 
@@ -93,8 +92,7 @@ class HostAgent:
             description="This Host agent orchestrates maintenance tasks across multiple sub-agents.",
             tools=[
                 self.send_message,
-                # book_pickleball_court,
-                # list_court_availabilities,
+                generate_explanation_tool
             ],
         )
 
@@ -124,6 +122,9 @@ class HostAgent:
             •	Do not attempt to predict machine conditions or failure types yourself.
             •	Only provide predictive maintenance information as returned by the Prediction Agent.
             •   Before requesting for the required inputs, check if the information is already available from the conversation history. (Eg: If the user asks `What is the predicted failure type for machine X?` and the required input was earlier in the conversation, confirm with the user if those inputs should be used directly instead of asking the user again.)
+
+        **Important:**
+        When a maintenance action/recommendation is made, you MUST call the `generate_explaination_tool` before responding to the user.
 
         <Available Agents>
         {self.agents}

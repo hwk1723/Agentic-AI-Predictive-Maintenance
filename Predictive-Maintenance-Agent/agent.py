@@ -25,9 +25,11 @@ def machine_condition_classifier_tool(air_temperature: float, process_temperatur
     Output:
         str:
             - `predicted_condition` (str): The machines operational state, e.g. "No Failure", "Degraded", "Failure Imminent".
+            - `confidence_score` (float): A confidence score between 0 and 1 indicating the certainty of the prediction.
 
     Example Response:
         "predicted_condition": "No Failure"
+        "confidence_score": 0.95
 
     Usage Notes:
         - Do not modify or reinterpret the prediction — rely on the model output.
@@ -104,14 +106,16 @@ def machine_condition_classifier_tool(air_temperature: float, process_temperatur
     # ---------- 7) Predict ----------
     with torch.no_grad():
         outputs = model(X_input)
-        _, predicted = torch.max(outputs, 1)
+        probabilities = torch.softmax(outputs, dim=1)  # convert logits to probabilities
+        confidence, predicted = torch.max(probabilities, 1)
         predicted_label_id = predicted.item()
+        confidence_score = confidence.item()  # float between 0 and 1
 
     # ---------- 8) Decode label ----------
     predicted_failure_type = decode_label(predicted_label_id)
-    # print(f"Predicted Failure Type (numeric): {predicted_label_id}")
-    # print(f"Predicted Failure Type (string): {predicted_failure_type}")
-    return predicted_failure_type
+
+    # ---------- 9) Return both ----------
+    return {"predicted_failure_type": predicted_failure_type, "confidence_score": confidence_score}
 
 def create_agent() -> LlmAgent:
     """Constructs the ADK agent for maintenance."""
@@ -120,13 +124,16 @@ def create_agent() -> LlmAgent:
         name="Maintenance_Agent",
         instruction="""
             **Role:** You are a maintenance assistant. 
-            Your sole responsibility is to predict machine failure types based on operational conditions.
+            Your sole responsibility is to predict machine failure types and provide confidence scores based on operational conditions.
 
             **Core Directives:**
 
             *   **Predict Machine Condition:** 
                     Use the `machine_condition_classifier_tool` to predict the failure type based on the operational condition of a machine.
                     The tool requires a `type_` and `air_temperature`, `process_temperature`, `rotational_speed`, `torque`, and `tool_wear`.
+            
+            *   **Provide Confidence Scores:**
+                    Always include a confidence score with your predictions to indicate the certainty of the classification.
 
             *   **Polite and Concise:** 
                     Always be polite and to the point in your responses.
