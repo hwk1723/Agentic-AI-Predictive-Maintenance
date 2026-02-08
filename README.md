@@ -2,10 +2,10 @@
 This document describes a multi-agent application demonstrating how to orchestrate conversations between different agents to schedule a meeting.
 
 This application contains four agents:
-*   **Host Agent**: The primary agent that orchestrates the scheduling task.
-*   **Kaitlynn Agent**: An agent representing Kaitlynn's calendar and preferences.
-*   **Nate Agent**: An agent representing Nate's calendar and preferences.
-*   **Karley Agent**: An agent representing Karley's calendar and preferences.
+*   **Host Agent**: The primary agent that orchestrates the tasks.
+*   **RAG Agent**: An agent that fetches information about SOP and maintenance guides.
+*   **Database Agent**: An agent that queries equipment parameters from a database.
+*   **Predictive Maintenance Agent**: An agent that predicts failure conditions of equipment.
 
 ## Setup and Deployment
 
