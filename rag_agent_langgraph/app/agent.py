@@ -1,22 +1,17 @@
-import random
-from collections.abc import AsyncIterable
-from datetime import date, datetime, timedelta
-from typing import Any, List, Literal
+import os
+from datetime import date
+from typing import Literal
 
-from langchain_core.messages import AIMessage, ToolMessage
+from langchain_core.messages import AIMessage
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
-# from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_ollama import ChatOllama
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.prebuilt import create_react_agent
 from pydantic import BaseModel, Field
 
-import os
 from langchain_openai import OpenAIEmbeddings
-# from langchain_community.document_loaders import PyPDFLoader
+from langchain_ollama import ChatOllama
 from langchain_chroma import Chroma
-# from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 memory = MemorySaver()
 
@@ -30,7 +25,6 @@ class AvailabilityToolInput(BaseModel):
             "A natural language description of what predicted condition information to retrieve."
         ),
     )
-
 
 @tool(args_schema=AvailabilityToolInput)
 def maintenance_docs_RAG(query: str) -> str:
@@ -59,7 +53,6 @@ def maintenance_docs_RAG(query: str) -> str:
                 Corrective actions.
             - If not specified, provide all 3 types of recommendations.
 
-
     Example Response:
         "recommendations": "1. The Immediate actions are to...\n"
                         "2. Diagnostic steps are to...\n"
@@ -73,28 +66,7 @@ def maintenance_docs_RAG(query: str) -> str:
 
     embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
 
-    # pdf_path = "/Users/howaikit/Documents/GitHub/Agentic-AI-Predictive-Maintenance/rag_agent_langgraph/app/Document.pdf"
-
-    # if not os.path.exists(pdf_path):
-    #     raise FileNotFoundError(f"PDF file not found at {pdf_path}")
-
-    # pdf_loader = PyPDFLoader(pdf_path)
-
-    # try:
-    #     pages = pdf_loader.load()
-    #     print(f"Loaded {len(pages)} pages from the PDF file.")
-    # except Exception as e:
-    #     print(f"Error loading PDF file: {e}")
-    #     raise
-
-    # text_splitter = RecursiveCharacterTextSplitter(
-    #     chunk_size=1000, 
-    #     chunk_overlap=200)
-
-    # pages_split = text_splitter.split_documents(pages)
-
     persist_directory = r"/Users/howaikit/Documents/GitHub/Agentic-AI-Predictive-Maintenance/rag_agent_langgraph/app/vectorstore"
-    # collection_name = "maintenance_and_sop_collection"
 
     if not os.path.exists(persist_directory):
         os.makedirs(persist_directory)
@@ -104,13 +76,7 @@ def maintenance_docs_RAG(query: str) -> str:
             embedding_function=embeddings,
             persist_directory=persist_directory,
             collection_name="maintenance_and_sop_collection"
-        # vector_store = Chroma.from_documents(
-        #     documents=pages_split,
-        #     embedding=embeddings,
-        #     persist_directory=persist_directory,
-        #     collection_name=collection_name
         )
-        # print(f"Vector store created with {len(pages)} documents.")
         print(f"Vector store loaded.")
     except Exception as e:
         print(f"Error loading vector store: {e}")
@@ -130,13 +96,11 @@ def maintenance_docs_RAG(query: str) -> str:
         results.append(f"Document {i+1}:\n{doc.page_content}\n")
     return "\n\n".join(results)
 
-
 class ResponseFormat(BaseModel):
     """Respond to the user in this format."""
 
     status: Literal["input_required", "completed", "error"] = "input_required"
     message: str
-
 
 class RagAgent:
     """RagAgent - a specialized assistant for scheduling."""
@@ -155,11 +119,10 @@ class RagAgent:
     )
 
     def __init__(self):
-        # self.model = ChatGoogleGenerativeAI(model="gemini-2.0-flash")
         self.model = ChatOllama(
             model="qwen3:4b",
             temperature=0,
-            streaming=False,      # IMPORTANT: prevents event queue closure
+            streaming=False,
         )
         self.tools = [maintenance_docs_RAG]
 
@@ -180,7 +143,6 @@ class RagAgent:
             config,
         )
         return self.get_agent_response(config)
-
 
     def get_agent_response(self, config):
         current_state = self.graph.get_state(config)

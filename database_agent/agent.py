@@ -1,14 +1,7 @@
 import sqlite3
 from google.adk.agents import LlmAgent
 
-
-import torch
-import torch.nn as nn
-import numpy as np
-import pandas as pd
-
 DB_PATH = "predictive_maintenance.db"
-
 
 def query_machine_status(product_id: str) -> str:
     """
