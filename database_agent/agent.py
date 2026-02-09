@@ -47,7 +47,7 @@ def create_agent() -> LlmAgent:
         name="Database_Agent",
         instruction="""
             **Role:** You are a Database agent assistant. 
-            Your sole responsibility is to query information from a database, respond to inquiries about machine parameters.
+            Your sole responsibility is to query information from a database, respond to inquiries about machine parameters(sensor readings).
 
             **Core Directives:**
 

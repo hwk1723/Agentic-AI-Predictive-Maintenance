@@ -115,7 +115,10 @@ def machine_condition_classifier_tool(air_temperature: float, process_temperatur
     predicted_failure_type = decode_label(predicted_label_id)
 
     # ---------- 9) Return both ----------
-    return {"predicted_failure_type": predicted_failure_type, "confidence_score": confidence_score}
+    return (
+        f"- Predicted_failure_type: {predicted_failure_type}" 
+        f"- Confidence_score: {confidence_score}"
+    )
 
 def create_agent() -> LlmAgent:
     """Constructs the ADK agent for maintenance."""
